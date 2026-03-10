@@ -1,34 +1,66 @@
-import CategoryChart from '../components/CategoryChart';
-import { FISCAL_YEAR, TOTAL_BUDGET } from '../data/budget';
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase' // Caminho agora corrigido
+
+interface BudgetItem {
+  department: string;
+  amount: number;
+}
 
 export default function Home() {
+  const [data, setData] = useState<BudgetItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchFromSupabase() {
+      const { data: dbData, error } = await supabase
+        .from('budget_items') // Nome da sua tabela
+        .select('department, amount')
+        .order('amount', { ascending: false })
+
+      if (!error && dbData) {
+        setData(dbData)
+      }
+      setLoading(false)
+    }
+    fetchFromSupabase()
+  }, [])
+
+  const totalBudget = 110600000 // Total de $110.6M
+
+  if (loading) return <div className="p-20 text-center font-serif">Conectando ao banco de dados...</div>
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
-      <section className="mb-16 sm:mb-20">
-        <p className="font-body text-sm sm:text-base font-semibold tracking-wide uppercase text-accent mb-3">
-          City of Redding General Fund — {FISCAL_YEAR}
+    <div className="p-8 max-w-4xl mx-auto bg-[#fdfaf5] min-h-screen">
+      <header className="mb-12">
+        <p className="text-orange-600 font-bold uppercase tracking-widest text-xs">
+          City of Redding General Fund — FY 2025-26
         </p>
-        <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-bold text-navy mb-4 tracking-tight">
-          ${TOTAL_BUDGET} Million
-        </h1>
-        <p className="font-body text-lg sm:text-xl text-ink/60 max-w-xl">
-          This is how your tax dollars were spent.
-        </p>
-      </section>
+        <h1 className="text-7xl font-serif font-bold text-[#1a365d] mt-2">$110.6 Million</h1>
+        <p className="text-gray-500 mt-4 text-xl italic">This is how your tax dollars were spent.</p>
+      </header>
 
-      <section>
-        <h2 className="font-heading text-2xl sm:text-3xl text-navy mb-8">
-          Spending by Category
-        </h2>
-
-        <CategoryChart />
-
-        <p className="mt-8 text-sm text-ink/45 font-body leading-relaxed max-w-2xl">
-          Source: City of Redding Biennial Budget {FISCAL_YEAR}. General Fund only.
-          See <a href="/methodology" className="underline hover:text-ink/60 transition-colors">Methodology</a> for
-          what is and isn't included.
-        </p>
-      </section>
+      <div className="space-y-8">
+        {data.map((item, index) => (
+          <div key={index} className="group">
+            <div className="flex justify-between items-end mb-2">
+              <span className="font-bold text-[#1a365d] text-lg">{item.department}</span>
+              <div className="flex gap-4 items-baseline">
+                <span className="text-gray-400 text-sm">${(item.amount / 1000000).toFixed(1)}M</span>
+                <span className="font-black text-[#1a365d]">
+                  {((item.amount / totalBudget) * 100).toFixed(1)}%
+                </span>
+              </div>
+            </div>
+            {/* Barra que cresce baseada no banco de dados */}
+            <div className="w-full bg-gray-200 h-4 rounded-full overflow-hidden">
+              <div 
+                className="bg-[#1a365d] h-full rounded-full transition-all duration-1000"
+                style={{ width: `${(item.amount / 42700000) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
-  );
+  )
 }
