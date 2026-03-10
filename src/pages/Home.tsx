@@ -35,7 +35,7 @@ export default function Home() {
   )
 
   return (
-    <div className="p-8 max-w-4xl mx-auto bg-[#fdfaf5] min-h-screen selection:bg-orange-100">
+    <div className="p-8 max-w-4xl mx-auto bg-[#fdfaf5] min-h-screen">
       <header className="mb-16 border-l-4 border-[#1a365d] pl-6">
         <p className="text-orange-600 font-bold uppercase tracking-widest text-xs mb-2">
           City of Redding General Fund — FY 2025-26
@@ -55,23 +55,23 @@ export default function Home() {
               </span>
               <div className="flex gap-4 items-baseline">
                 <span className="text-gray-400 text-sm font-mono">
-                  ${(item.amount).toLocaleString('en-US')}
+                  ${Number(item.amount).toLocaleString('en-US')}
                 </span>
                 <span className="font-black text-[#1a365d] text-lg">
-                  {((item.amount / totalBudget) * 100).toFixed(1)}%
+                  {((Number(item.amount) / totalBudget) * 100).toFixed(1)}%
                 </span>
               </div>
             </div>
 
             <p className="text-gray-600 text-sm mb-4 leading-relaxed max-w-2xl border-l border-gray-200 pl-4">
-              {item.description}
+              {item.description || "Description pending..."}
             </p>
 
-            <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
+            <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden text-[0px]">
               <div 
-                className="bg-[#1a365d] h-full rounded-full transition-all duration-1000 ease-out group-hover:bg-orange-600 shadow-sm"
+                className="bg-[#1a365d] h-full rounded-full transition-all duration-1000 ease-out group-hover:bg-orange-600"
                 style={{ 
-                  width: `${(item.amount / 42700000) * 100}%`,
+                  width: `${(Number(item.amount) / 42700000) * 100}%`,
                   transitionDelay: `${index * 100}ms` 
                 }}
               ></div>
@@ -80,9 +80,8 @@ export default function Home() {
         ))}
       </div>
       
-      <footer className="mt-24 pt-8 border-t border-gray-200 text-gray-400 text-xs font-sans flex justify-between">
-        <span>Source: City of Redding Biennial Budget. General Fund only.</span>
-        <span className="font-bold uppercase tracking-tighter">Official Transparency Project</span>
+      <footer className="mt-24 pt-8 border-t border-gray-200 text-gray-400 text-xs font-sans">
+        Source: City of Redding Biennial Budget. General Fund only.
       </footer>
     </div>
   )
